@@ -18,7 +18,7 @@ a{color:inherit}
 .wrap{max-width:860px;margin:0 auto;padding:0 16px 48px}
 header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 0 8px}
 .brand{font-weight:800;font-size:15px}.brand small{display:block;font-weight:400;color:var(--muted);font-size:12px}
-.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);text-decoration:none;font:700 13px Almarai,sans-serif;padding:8px 14px;border-radius:999px;cursor:pointer}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);text-decoration:none;font:700 13px Almarai,sans-serif;padding:8px 14px;border-radius:999px;cursor:pointer;white-space:nowrap}
 .btn.primary{background:var(--emerald);color:var(--on-emerald);border-color:var(--emerald)}
 /* hero */
 .hero{background:var(--emerald);color:var(--on-emerald);border-radius:22px;padding:22px 22px 20px;margin:8px 0 18px;position:relative;overflow:hidden}
@@ -107,13 +107,21 @@ textarea.ans{display:block;width:100%;min-height:44px;margin:6px 0;font:16px/1.8
  .blank .pool .pill{border:1px solid #999}
  .act-h{break-after:avoid}
 }
+.wsgroup{margin-top:18px}.wsgroup h3{font-size:17px;color:var(--c);margin:0 0 8px}
+.wslist{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.wsitem{display:flex;justify-content:space-between;align-items:center;gap:8px;text-decoration:none;background:var(--surface);border:1px solid var(--line);border-inline-start:4px solid var(--c);border-radius:12px;padding:10px 12px;font-weight:700;font-size:14px}
+.wsitem small{font-weight:400;color:var(--muted);font-size:11px;white-space:nowrap}
+.lhead .ltitle{font-size:24px;color:var(--c);margin:6px 0 0}.lv{border-radius:14px;overflow:hidden;margin-top:6px}
+.soonbox{background:var(--surface2);border:1px dashed var(--line);border-radius:12px;padding:16px;text-align:center;color:var(--muted);font-size:14px}
+h1.wstitle{font-size:17px;color:var(--ink)}
+.lt a{text-decoration:none}
 </style>
 </head>
 <body>
 <div class="wrap">
  <header class="top">
   <div class="brand">موادي — الصف الأول المتوسط<small>مدرسة ذي النورين المتوسطة لتحفيظ القرآن الكريم</small></div>
-  <a class="btn primary" href="https://9a7er1-ui.github.io/quran-parent-portal/">درجاتي</a>
+  <div style="display:flex;gap:6px"><a class="btn" href="#all-ws">جميع الدروس</a><a class="btn primary" href="https://9a7er1-ui.github.io/quran-parent-portal/">درجاتي</a></div>
  </header>
  <div id="notices"></div>
  <section class="hero" id="hero"></section>
@@ -146,30 +154,30 @@ const WEEKS = [
 
 /* المواد: key → اسم */
 const SUBJECTS = {
- hifz:"خطة الحفظ اليومية", quran:"القرآن الكريم", tawheed:"التوحيد", tafsir:"التفسير",
+ hifz:"خطة الحفظ اليومية (القرآن الكريم)", tawheed:"التوحيد", tafsir:"التفسير",
  hadith:"الحديث", fiqh:"الفقه", tajweed:"التجويد"
 };
 
 /* دروس كل أسبوع. w = ورقة العمل (اسم الملف في مجلد worksheets) */
 const LESSONS = {
- 1:{quran:[{t:"تلاوة: سورة النمل (١–٢٢)"}], tawheed:[{t:"التوحيد وأقسامه",w:"i01"}], tafsir:[{t:"تفسير سورتي الناس والفلق",w:"i13"}], hadith:[{t:"حرص النبي ﷺ على هداية أمته",w:"i28"}], fiqh:[{t:"مدخل لمادة الفقه + الطهارة",w:"i42"}], tajweed:[{t:"التهيئة"},{t:"علم التجويد",w:"t01"}]},
- 2:{quran:[{t:"تلاوة: سورة النمل (٢٣–٤٤)"}], tawheed:[{t:"أهمية التوحيد",w:"i02"}], tafsir:[{t:"تفسير سورتي الناس والفلق",w:"i13"}], hadith:[{t:"شفقة النبي ﷺ على تعليم أمته",w:"i29"}], fiqh:[{t:"أحكام النجاسة",w:"i43"}], tajweed:[{t:"اللحن في قراءة القرآن الكريم",w:"t02"}]},
- 3:{quran:[{t:"حفظ: سورة التحريم (١–٣)"}], tawheed:[{t:"فضل التوحيد وتحقيقه",w:"i03"}], tafsir:[{t:"تفسير سورتي الإخلاص والمسد",w:"i14"}], hadith:[{t:"شكر الله باحترام النعم",w:"i30"}], fiqh:[{t:"أحكام قضاء الحاجة",w:"i44"}], tajweed:[{t:"اللحن في قراءة القرآن الكريم",w:"t02"}]},
- 4:{quran:[{t:"تلاوة: سورة النمل (٤٥–٦٢)"}], tawheed:[{t:"المعتقدات التي تضاد التوحيد",w:"i04"}], tafsir:[{t:"تفسير سورتي النصر والكافرون",w:"i15"}], hadith:[{t:"إجازة اليوم الوطني",off:1}], fiqh:[{t:"إجازة اليوم الوطني",off:1}], tajweed:[{t:"الاستعاذة والبسملة والأوجه بين السورتين",w:"t03"}]},
- 5:{quran:[{t:"تلاوة: سورة النمل (٦٤–٩٢)"}], tawheed:[{t:"شهادة أن لا إله إلا الله",w:"i05"}], tafsir:[{t:"تفسير سورتي الكوثر والماعون",w:"i16"}], hadith:[{t:"أحب الأعمال إلى الله",w:"i31"}], fiqh:[{t:"الوضوء",w:"i45"}], tajweed:[{t:"مراتب القراءة",w:"t04"}]},
- 6:{quran:[{t:"حفظ: سورة التحريم (٤–٦)"}], tawheed:[{t:"شهادة أن محمدًا رسول الله",w:"i06"}], tafsir:[{t:"تفسير سورتي قريش والفيل",w:"i17"}], hadith:[{t:"كفارة الذنوب",w:"i32"}], fiqh:[{t:"المسح على الخفين والجوربين والجبيرة",w:"i46"}], tajweed:[{t:"أحكام النون الساكنة والتنوين",w:"t05",q:"https://9a7er1-ui.github.io/tajweed/"}]},
- 7:{quran:[{t:"تلاوة: سورة القصص (١–٢١)"}], tawheed:[{t:"الشرك وأنواعه",w:"i07"}], tafsir:[{t:"تفسير سورتي الهمزة والعصر",w:"i18"}], hadith:[{t:"فضل الرباط في سبيل الله",w:"i33"}], fiqh:[{t:"المسح على الخفين والجوربين والجبيرة",w:"i46"}], tajweed:[{t:"الإظهار الحلقي",w:"t06"}]},
- 8:{quran:[{t:"حفظ: سورة التحريم (٦–٨)"}], tawheed:[{t:"الشرك في الربوبية",w:"i08"}], tafsir:[{t:"تفسير سورتي التكاثر والقارعة",w:"i19"}], hadith:[{t:"فضل التسبيح والتحميد",w:"i34"}], fiqh:[{t:"التيمم",w:"i47"}], tajweed:[{t:"الإدغام",w:"t07"}]},
- 9:{quran:[{t:"تلاوة: سورة القصص (٢٢–٣٥)"}], tawheed:[{t:"الشرك في الألوهية",w:"i09"}], tafsir:[{t:"تفسير سورة العاديات",w:"i20"}], hadith:[{t:"أهمية أذكار الصباح والمساء",w:"i35"}], fiqh:[{t:"الأذان والإقامة",w:"i48"}], tajweed:[{t:"مراجعة",rev:1}]},
- 10:{quran:[{t:"حفظ: سورة التحريم (٩–آخرها)"}], tawheed:[{t:"خطر الشرك",w:"i10"}], tafsir:[{t:"تفسير سورة الزلزلة",w:"i21"}], hadith:[{t:"أهمية التوبة والاستغفار",w:"i36"}], fiqh:[{t:"منزلة الصلاة وفضلها",w:"i49"}], tajweed:[{t:"الإقلاب",w:"t08"}]},
- 11:{quran:[{t:"تلاوة: سورة القصص (٣٦–٥٠)"}], tawheed:[{t:"الحذر من الشرك",w:"i11"}], tafsir:[{t:"تفسير الآيات (١٧–٢٦) من سورة النمل",w:"i22"}], hadith:[{t:"الذكر بعد الصلاة",w:"i37"}], fiqh:[{t:"آداب المشي إلى الصلاة وانتظارها",w:"i50"}], tajweed:[{t:"الإخفاء الحقيقي",w:"t09"}]},
- 12:{quran:[{t:"حفظ: سورة الطلاق (١–٢)"}], tawheed:[{t:"حماية النبي ﷺ للتوحيد وسدّه الطرق الموصلة للشرك",w:"i12"}], tafsir:[{t:"تفسير الآيات (٧–٩) من سورة القصص",w:"i23"}], hadith:[{t:"أثر الصحبة",w:"i38"}], fiqh:[{t:"صفة الصلاة",w:"i51"}], tajweed:[{t:"مراجعة",rev:1}]},
- 13:{quran:[{t:"تلاوة: سورة القصص (٥١–٧٠)"},{t:"حفظ: سورة الطلاق (٣–٥)"}], tafsir:[{t:"تفسير الآيات (١٠–١٤) من سورة القصص",w:"i24"}], hadith:[{t:"الجليس الصالح وجليس السوء",w:"i39"}], fiqh:[{t:"صفة الصلاة",w:"i51"}], tajweed:[{t:"أحكام الميم الساكنة",w:"t10"}]},
- 14:{quran:[{t:"تلاوة: سورة القصص (٥١–٧٠)"},{t:"حفظ: سورة الطلاق (٦–٨)"}], tafsir:[{t:"تفسير الآيات (٧٦–٧٨) من سورة القصص",w:"i25"}], hadith:[{t:"الخلق الحسن",w:"i40"}], fiqh:[{t:"شروط الصلاة",w:"i52"}], tajweed:[{t:"أحكام الميم الساكنة",w:"t10"}]},
- 15:{quran:[{t:"تلاوة: سورة القصص (٧١–٨٨)"},{t:"حفظ: سورة الطلاق (٩–١٢)"}], tafsir:[{t:"تفسير الآيات (٧٩–٨٢) من سورة القصص",w:"i26"}], hadith:[{t:"عظم أجر حسن الخلق",w:"i41"}], fiqh:[{t:"أركان الصلاة",w:"i53"}], tajweed:[{t:"حكم الميم والنون المشددتين",w:"t11"}]},
- 16:{quran:[{t:"تلاوة: سورة القصص (٧١–٨٨)"},{t:"حفظ: سورة الطلاق (٩–١٢)"}], tafsir:[{t:"تفسير الآيات (٨٣–٨٤) من سورة القصص",w:"i27"}], hadith:[{t:"عظم أجر حسن الخلق",w:"i41"}], fiqh:[{t:"واجبات الصلاة",w:"i54"}], tajweed:[{t:"حكم الميم والنون المشددتين",w:"t11"},{t:"مراجعة",rev:1}]},
- 17:{quran:[{t:"استكمال التقويم",rev:1}], tawheed:[{t:"مراجعة التوحيد",rev:1}], tafsir:[{t:"مراجعة التفسير",rev:1}], hadith:[{t:"مراجعة الحديث",rev:1}], fiqh:[{t:"مراجعة الفقه",rev:1}], tajweed:[{t:"مراجعة عامة",rev:1}]},
- 18:{quran:[{t:"اختبارات نهاية الفصل",rev:1}], tajweed:[{t:"الاختبارات الشفهية والعملية والنهائية",rev:1}]}
+ 1:{tawheed:[{t:"التوحيد وأقسامه",w:"i01"}], tafsir:[{t:"تفسير سورتي الناس والفلق",w:"i13"}], hadith:[{t:"حرص النبي ﷺ على هداية أمته",w:"i28"}], fiqh:[{t:"مدخل لمادة الفقه + الطهارة",w:"i42"}], tajweed:[{t:"التهيئة"},{t:"علم التجويد",w:"t01"}]},
+ 2:{tawheed:[{t:"أهمية التوحيد",w:"i02"}], tafsir:[{t:"تفسير سورتي الناس والفلق",w:"i13"}], hadith:[{t:"شفقة النبي ﷺ على تعليم أمته",w:"i29"}], fiqh:[{t:"أحكام النجاسة",w:"i43"}], tajweed:[{t:"اللحن في قراءة القرآن الكريم",w:"t02"}]},
+ 3:{tawheed:[{t:"فضل التوحيد وتحقيقه",w:"i03"}], tafsir:[{t:"تفسير سورتي الإخلاص والمسد",w:"i14"}], hadith:[{t:"شكر الله باحترام النعم",w:"i30"}], fiqh:[{t:"أحكام قضاء الحاجة",w:"i44"}], tajweed:[{t:"اللحن في قراءة القرآن الكريم",w:"t02"}]},
+ 4:{tawheed:[{t:"المعتقدات التي تضاد التوحيد",w:"i04"}], tafsir:[{t:"تفسير سورتي النصر والكافرون",w:"i15"}], hadith:[{t:"إجازة اليوم الوطني",off:1}], fiqh:[{t:"إجازة اليوم الوطني",off:1}], tajweed:[{t:"الاستعاذة والبسملة والأوجه بين السورتين",w:"t03"}]},
+ 5:{tawheed:[{t:"شهادة أن لا إله إلا الله",w:"i05"}], tafsir:[{t:"تفسير سورتي الكوثر والماعون",w:"i16"}], hadith:[{t:"أحب الأعمال إلى الله",w:"i31"}], fiqh:[{t:"الوضوء",w:"i45"}], tajweed:[{t:"مراتب القراءة",w:"t04"}]},
+ 6:{tawheed:[{t:"شهادة أن محمدًا رسول الله",w:"i06"}], tafsir:[{t:"تفسير سورتي قريش والفيل",w:"i17"}], hadith:[{t:"كفارة الذنوب",w:"i32"}], fiqh:[{t:"المسح على الخفين والجوربين والجبيرة",w:"i46"}], tajweed:[{t:"أحكام النون الساكنة والتنوين",w:"t05",q:"https://9a7er1-ui.github.io/tajweed/"}]},
+ 7:{tawheed:[{t:"الشرك وأنواعه",w:"i07"}], tafsir:[{t:"تفسير سورتي الهمزة والعصر",w:"i18"}], hadith:[{t:"فضل الرباط في سبيل الله",w:"i33"}], fiqh:[{t:"المسح على الخفين والجوربين والجبيرة",w:"i46"}], tajweed:[{t:"الإظهار الحلقي",w:"t06"}]},
+ 8:{tawheed:[{t:"الشرك في الربوبية",w:"i08"}], tafsir:[{t:"تفسير سورتي التكاثر والقارعة",w:"i19"}], hadith:[{t:"فضل التسبيح والتحميد",w:"i34"}], fiqh:[{t:"التيمم",w:"i47"}], tajweed:[{t:"الإدغام",w:"t07"}]},
+ 9:{tawheed:[{t:"الشرك في الألوهية",w:"i09"}], tafsir:[{t:"تفسير سورة العاديات",w:"i20"}], hadith:[{t:"أهمية أذكار الصباح والمساء",w:"i35"}], fiqh:[{t:"الأذان والإقامة",w:"i48"}], tajweed:[{t:"مراجعة",rev:1}]},
+ 10:{tawheed:[{t:"خطر الشرك",w:"i10"}], tafsir:[{t:"تفسير سورة الزلزلة",w:"i21"}], hadith:[{t:"أهمية التوبة والاستغفار",w:"i36"}], fiqh:[{t:"منزلة الصلاة وفضلها",w:"i49"}], tajweed:[{t:"الإقلاب",w:"t08"}]},
+ 11:{tawheed:[{t:"الحذر من الشرك",w:"i11"}], tafsir:[{t:"تفسير الآيات (١٧–٢٦) من سورة النمل",w:"i22"}], hadith:[{t:"الذكر بعد الصلاة",w:"i37"}], fiqh:[{t:"آداب المشي إلى الصلاة وانتظارها",w:"i50"}], tajweed:[{t:"الإخفاء الحقيقي",w:"t09"}]},
+ 12:{tawheed:[{t:"حماية النبي ﷺ للتوحيد وسدّه الطرق الموصلة للشرك",w:"i12"}], tafsir:[{t:"تفسير الآيات (٧–٩) من سورة القصص",w:"i23"}], hadith:[{t:"أثر الصحبة",w:"i38"}], fiqh:[{t:"صفة الصلاة",w:"i51"}], tajweed:[{t:"مراجعة",rev:1}]},
+ 13:{tafsir:[{t:"تفسير الآيات (١٠–١٤) من سورة القصص",w:"i24"}], hadith:[{t:"الجليس الصالح وجليس السوء",w:"i39"}], fiqh:[{t:"صفة الصلاة",w:"i51"}], tajweed:[{t:"أحكام الميم الساكنة",w:"t10"}]},
+ 14:{tafsir:[{t:"تفسير الآيات (٧٦–٧٨) من سورة القصص",w:"i25"}], hadith:[{t:"الخلق الحسن",w:"i40"}], fiqh:[{t:"شروط الصلاة",w:"i52"}], tajweed:[{t:"أحكام الميم الساكنة",w:"t10"}]},
+ 15:{tafsir:[{t:"تفسير الآيات (٧٩–٨٢) من سورة القصص",w:"i26"}], hadith:[{t:"عظم أجر حسن الخلق",w:"i41"}], fiqh:[{t:"أركان الصلاة",w:"i53"}], tajweed:[{t:"حكم الميم والنون المشددتين",w:"t11"}]},
+ 16:{tafsir:[{t:"تفسير الآيات (٨٣–٨٤) من سورة القصص",w:"i27"}], hadith:[{t:"عظم أجر حسن الخلق",w:"i41"}], fiqh:[{t:"واجبات الصلاة",w:"i54"}], tajweed:[{t:"حكم الميم والنون المشددتين",w:"t11"},{t:"مراجعة",rev:1}]},
+ 17:{tawheed:[{t:"مراجعة التوحيد",rev:1}], tafsir:[{t:"مراجعة التفسير",rev:1}], hadith:[{t:"مراجعة الحديث",rev:1}], fiqh:[{t:"مراجعة الفقه",rev:1}], tajweed:[{t:"مراجعة عامة",rev:1}]},
+ 18:{tajweed:[{t:"الاختبارات الشفهية والعملية والنهائية",rev:1}]}
 };
 
 /* خطة الحفظ اليومية من استمارات المتابعة: "شهر/يوم": [السورة، من، إلى] — الخميس تلاوة */
@@ -235,13 +243,13 @@ function ytId(u){const m=String(u).match(/(?:youtu\.be\/|v=|shorts\/|embed\/)([\
 function lessonHTML(l,wn,sk,i){
  if(l.off||l.rev)return `<div class="lesson"><div class="lt ${l.off?'muted':''}">${l.t}</div></div>`;
  const id=`d-${wn}-${sk}-${i}`;const a=[];
- if(l.v){const y=ytId(l.v);a.push(y?`<button class="act v" onclick="openV('${y}')">▶ شاهد الشرح</button>`:`<a class="act v" href="${l.v}" target="_blank" rel="noopener">▶ شاهد الشرح</a>`)}
- if(l.w&&WS[l.w]){const st=wsState(l.w);a.push(`<a class="act" href="#ws-${l.w}">ورقة العمل${st?`<span class="wsstate">${st}</span>`:''}</a>`)}
+ if(l.v&&!(l.w&&WS[l.w])){const y=ytId(l.v);a.push(y?`<button class="act v" onclick="openV('${y}')">▶ شاهد الشرح</button>`:`<a class="act v" href="${l.v}" target="_blank" rel="noopener">▶ شاهد الشرح</a>`)}
+ if(l.w&&WS[l.w]){const st=wsState(l.w);a.push(`<a class="act v" href="#ws-${l.w}">افتح الدرس وورقة العمل${st?`<span class="wsstate">${st}</span>`:''}</a>`)}
  if(l.q)a.push(`<a class="act q" href="${l.q}" target="_blank" rel="noopener">المسابقة</a>`);
  if(l.s)a.push(`<a class="act" href="${l.s}" target="_blank" rel="noopener">العرض</a>`);
- if(!l.v)a.push(`<span class="soon">الشرح المرئي قريبًا</span>`);
+ 
  const chk=store.get(id)?'checked':'';
- return `<div class="lesson"><div class="lt">${l.t}</div><div class="acts">${a.join('')}<label class="done"><input type="checkbox" ${chk} onchange="store.set('${id}',this.checked)">أنجزته</label></div></div>`;
+ return `<div class="lesson"><div class="lt">${l.w&&WS[l.w]?`<a href="#ws-${l.w}">${l.t}</a>`:l.t}</div><div class="acts">${a.join('')}<label class="done"><input type="checkbox" ${chk} onchange="store.set('${id}',this.checked)">أنجزته</label></div></div>`;
 }
 function hifzCard(w){
  const ks=hkeys.filter(k=>{const kk=K(...k.split('/').map(Number));return kk>=K(...w.from)&&kk<=K(...w.to)});
@@ -260,7 +268,24 @@ function show(i,push){
 function openV(id){document.getElementById('vf').innerHTML=`<iframe src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;document.getElementById('vd').showModal()}
 function closeV(){document.getElementById('vf').innerHTML='';document.getElementById('vd').close()}
 document.getElementById('vd').addEventListener('close',()=>document.getElementById('vf').innerHTML='');
-function route(){const m=location.hash.match(/^#ws-(\w+)$/);if(m&&WS[m[1]]){renderWS(m[1]);return}['hero','weeks','notices'].forEach(x=>document.getElementById(x).style.display='');const i=fromHash();LASTWEEK=WEEKS[i].brk?'#break':'#w'+WEEKS[i].n;show(i,false)}
+
+const WSG=[["tawheed","التوحيد",1,12,"i"],["tafsir","التفسير",13,27,"i"],["hadith","الحديث",28,41,"i"],["fiqh","الفقه",42,54,"i"],["tajweed","التجويد",1,11,"t"]];
+function wsLesson(id){for(const n in LESSONS)for(const s in LESSONS[n]){const l=LESSONS[n][s].find(x=>x.w===id);if(l)return{l,n:+n,s}}return null}
+function wsWeek(id){for(const n in LESSONS)for(const s in LESSONS[n])if(LESSONS[n][s].some(l=>l.w===id))return +n;return null}
+function renderAll(){
+ ['hero','weeks','notices'].forEach(x=>document.getElementById(x).style.display='none');
+ LASTWEEK='#all-ws';
+ let html=`<div class="wsbar"><button class="btn" onclick="location.hash=''">→ رجوع للأسابيع</button></div><h2 class="wtitle">جميع الدروس</h2><div class="wsub">دروس الفصل الدراسي الأول كاملة مع أوراق عملها، مرتبة حسب المادة</div>`;
+ for(const [k,name,a,b,p] of WSG){
+  html+=`<section class="wsgroup" style="--c:var(--s-${k})"><h3>${name}</h3><div class="wslist">`;
+  for(let i=a;i<=b;i++){const id=p+String(i).padStart(2,'0');const s=WS[id];if(!s)continue;const st=wsState(id);const wk=wsWeek(id);
+   html+=`<a class="wsitem" href="#ws-${id}"><span>${esc((wsLesson(id)||{l:{t:s.title.replace('ورقة عمل تفاعلية في ','')}}).l.t)}</span><small>${st?st+' · ':''}${wk?'الأسبوع '+AR(wk):''}</small></a>`}
+  html+=`</div></section>`;
+ }
+ document.getElementById('week').innerHTML=html;window.scrollTo(0,0);
+}
+
+function route(){if(location.hash==='#all-ws'){renderAll();return}const m=location.hash.match(/^#ws-(\w+)$/);if(m&&WS[m[1]]){renderWS(m[1]);return}['hero','weeks','notices'].forEach(x=>document.getElementById(x).style.display='');const i=fromHash();LASTWEEK=WEEKS[i].brk?'#break':'#w'+WEEKS[i].n;show(i,false)}
 
 /* ===== أوراق العمل التفاعلية ===== */
 const ansKey=id=>'ws:'+id;
@@ -276,9 +301,14 @@ function ta(key,rows){return `<textarea class="ans" data-k="${key}" rows="${rows
 function renderWS(id){
  const s=WS[id];CUR=id;ANS=loadA(id);PICK=null;const st=getStu();
  const today=T?`${AR(T.d)}/${AR(T.m)}/${AR(T.y)}هـ`:'';
- let html=`<div class="wsbar"><button class="btn" onclick="goBack()">→ رجوع للدروس</button><span class="saved" id="saved"></span></div>
+ let html=`<div class="wsbar"><button class="btn" onclick="goBack()">→ رجوع</button><span class="saved" id="saved"></span></div>
  <article class="wsv" id="wsv"><div class="printhead">مدرسة ذي النورين المتوسطة لتحفيظ القرآن الكريم · ${today}</div>
- <h1>${esc(s.title)}</h1><div class="info">${(s.info||[]).map(x=>`<span>${esc(x)}</span>`).join('')}</div>
+ ${(()=>{const L=wsLesson(id);if(!L)return `<h1>${esc(s.title)}</h1>`;const y=L.l.v?ytId(L.l.v):null;
+ return `<div class="lhead no-print" style="--c:var(--s-${L.s})"><span class="tag">${SUBJECTS[L.s]} · الأسبوع ${ORD[L.n]}</span><h1 class="ltitle">${esc(L.l.t)}</h1>
+ <div class="act-h" style="border-top:0;padding-top:0;margin-top:10px">شرح الدرس</div>
+ ${y?`<div class="vframe lv"><iframe src="https://www.youtube-nocookie.com/embed/${y}?rel=0" allow="encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>`:(L.l.v?`<a class="act v" href="${L.l.v}" target="_blank" rel="noopener">▶ شاهد الشرح</a>`:`<div class="soonbox">الشرح المرئي لهذا الدرس يُضاف قريبًا</div>`)}
+ ${L.l.q?`<a class="btn" style="margin-top:10px;background:var(--gold-soft)" href="${L.l.q}" target="_blank" rel="noopener">المسابقة</a>`:''}
+ <div class="act-h">ورقة العمل</div></div><h1 class="wstitle">${esc(s.title)}</h1>`})()}<div class="info">${(s.info||[]).map(x=>`<span>${esc(x)}</span>`).join('')}</div>
  <div class="stu"><div><label>اسم الطالب</label><input id="stuName" value="${esc(st.name||'')}" placeholder="اكتب اسمك"></div>
  <div><label>الشعبة</label><select id="stuSec"><option value="">—</option><option ${st.sec==='أول متوسط ٥'?'selected':''}>أول متوسط ٥</option><option ${st.sec==='أول متوسط ٦'?'selected':''}>أول متوسط ٦</option></select></div></div>`;
  s.blocks.forEach((b,i)=>{
